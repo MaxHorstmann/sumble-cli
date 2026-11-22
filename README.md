@@ -6,14 +6,17 @@ Unofficial, lightweight, dependency-free CLI for the [Sumble API](https://docs.s
 
 ```sh
 go install github.com/MaxHorstmann/sumble-cli/cmd/sumble@latest
-# or, from a checkout:
-go install ./cmd/sumble
 ```
 
 ## Auth
 
 Set `SUMBLE_API_KEY` (create one at https://sumble.com/account/api-keys). The CLI exits
 immediately if it is not set.
+
+```sh
+# For the current shell session (add to ~/.zshrc or ~/.bashrc to persist):
+export SUMBLE_API_KEY=your-api-key
+```
 
 ## Usage
 
