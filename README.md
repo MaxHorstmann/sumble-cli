@@ -40,3 +40,30 @@ orgs `id`/`name`/`slug`/`url`/`sumble_url`, are free). The default people attrib
 cost 5 credits per match.
 
 `SUMBLE_API_BASE_URL` overrides the API host (used by tests).
+
+## Example: weekly GitHub Actions report
+
+[The example workflow](.github/workflows/weekly-sumble-report.yml) looks up my
+LinkedIn profile every Monday at 09:00 UTC and posts the JSON response as a new
+comment on [the tracking issue](https://github.com/MaxHorstmann/sumble-cli/issues/4).
+It builds the CLI from this repository and runs:
+
+```sh
+sumble people find --linkedin "https://www.linkedin.com/in/max-horstmann" --attrs all --json
+```
+
+To enable it, add `SUMBLE_API_KEY` as a repository secret under **Settings >
+Secrets and variables > Actions**. Once the workflow is on the default branch,
+the weekly schedule is active; you can also run it from **Actions > What does
+Sumble know about me? > Run workflow** (`workflow_dispatch`).
+
+The workflow uses the built-in `GITHUB_TOKEN` with `issues: write` to post comments;
+no separate GitHub token is needed. Each comment links to its workflow run.
+Failed lookups (including no matches) also post a notice and leave the run failed.
+`--attrs all` requests every available attribute and consumes Sumble credits for
+each matched record and paid attribute.
+
+**Results are public in this repository.** Only use a profile whose information
+you intend to publish. To adapt the example, change the LinkedIn URL, hardcoded
+issue number, and repository guard in the workflow. The guard prevents forks
+from running this owner's report by default.
