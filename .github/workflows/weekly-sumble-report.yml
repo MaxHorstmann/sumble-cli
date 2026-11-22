@@ -6,59 +6,31 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  issues: write
 
 jobs:
   report:
     if: github.repository == 'MaxHorstmann/sumble-cli'
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    permissions:
-      contents: read
-      issues: write
     steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-
       - uses: actions/setup-go@v5
         with:
-          go-version-file: go.mod
+          go-version: stable
           cache: false
 
-      - name: Build the CLI
-        run: go build -o "$RUNNER_TEMP/sumble" ./cmd/sumble
-
-      - name: Look up my profile
-        id: lookup
+      - name: Install, look up, and comment
         env:
           SUMBLE_API_KEY: ${{ secrets.SUMBLE_API_KEY }}
-        run: |
-          "$RUNNER_TEMP/sumble" people find \
-            --linkedin "https://www.linkedin.com/in/max-horstmann" \
-            --attrs all --json \
-            > "$RUNNER_TEMP/sumble-result.json"
-
-      - name: Comment on the tracking issue
-        if: ${{ !cancelled() && (steps.lookup.outcome == 'success' || steps.lookup.outcome == 'failure') }}
-        env:
           GH_TOKEN: ${{ github.token }}
-          LOOKUP_OUTCOME: ${{ steps.lookup.outcome }}
-          ISSUE_NUMBER: "4"
         run: |
+          go install github.com/MaxHorstmann/sumble-cli/cmd/sumble@latest
+          status=0
+          sumble people find --linkedin "https://www.linkedin.com/in/max-horstmann" --attrs all --json > result.json || status=$?
           {
-            printf '## Sumble snapshot (%s)\n\n' "$(date -u +'%Y-%m-%d %H:%M UTC')"
-            printf '[Workflow run](%s/%s/actions/runs/%s)\n\n' \
-              "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID"
-            if [ "$LOOKUP_OUTCOME" != "success" ]; then
-              printf 'The lookup failed or returned no matches. See the workflow logs for details.\n\n'
-            fi
-            if [ -s "$RUNNER_TEMP/sumble-result.json" ]; then
-              printf '```json\n'
-              jq . "$RUNNER_TEMP/sumble-result.json"
-              printf '```\n'
-            fi
-          } > "$RUNNER_TEMP/sumble-comment.md"
-          gh issue comment "$ISSUE_NUMBER" \
-            --repo "$GITHUB_REPOSITORY" \
-            --body-file "$RUNNER_TEMP/sumble-comment.md"
+            printf '[Workflow run](%s/%s/actions/runs/%s)\n\nCLI exit code: %s\n\n```json\n' "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" "$status"
+            cat result.json
+            printf '\n```\n'
+          } > comment.md
+          gh issue comment 4 --repo "$GITHUB_REPOSITORY" --body-file comment.md
+          exit "$status"
