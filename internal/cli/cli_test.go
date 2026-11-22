@@ -14,14 +14,14 @@ import (
 const personResponse = `{
   "request_id": "r1", "status": "succeeded", "credits_used": 5, "credits_remaining": 95,
   "people": [{
-    "input": {"name": "Max Horstmann", "company_domain": "stackoverflow.com"},
+    "input": {"name": "Satya Nadella", "company_domain": "microsoft.com"},
     "person_id": 42,
     "sumble_url": "https://sumble.com/people/42",
     "attributes": {
-      "name": "Max Horstmann",
-      "job_title": "Engineer",
-      "current_employer": {"organization_id": 7, "name": "Stack Overflow", "slug": "stack-overflow"},
-      "location": "New York, US",
+      "name": "Satya Nadella",
+      "job_title": "Chairman and CEO",
+      "current_employer": {"organization_id": 7, "name": "Microsoft", "slug": "microsoft"},
+      "location": "Redmond, US",
       "linkedin_url": "https://www.linkedin.com/in/example"
     }
   }]
@@ -72,18 +72,18 @@ func TestHelpWorksWithoutKey(t *testing.T) {
 
 func TestPeopleFindTable(t *testing.T) {
 	res, body := runCLI(t, personResponse,
-		"people", "find", "--name", "Max Horstmann", "--company-domain", "stackoverflow.com")
+		"people", "find", "--name", "Satya Nadella", "--company-domain", "microsoft.com")
 	if res.code != 0 {
 		t.Fatalf("code=%d stderr=%q", res.code, res.stderr)
 	}
 	person := body["people"].([]any)[0].(map[string]any)
-	if person["name"] != "Max Horstmann" || person["company_domain"] != "stackoverflow.com" {
+	if person["name"] != "Satya Nadella" || person["company_domain"] != "microsoft.com" {
 		t.Errorf("request person = %v", person)
 	}
 	if _, ok := body["filter"]; ok {
 		t.Error("find must not send a filter")
 	}
-	for _, want := range []string{"NAME", "JOB_TITLE", "SUMBLE_URL", "Max Horstmann", "Stack Overflow", "https://sumble.com/people/42"} {
+	for _, want := range []string{"NAME", "JOB_TITLE", "SUMBLE_URL", "Satya Nadella", "Microsoft", "https://sumble.com/people/42"} {
 		if !strings.Contains(res.stdout, want) {
 			t.Errorf("stdout missing %q:\n%s", want, res.stdout)
 		}
@@ -110,7 +110,7 @@ func TestPeopleFindNoMatch(t *testing.T) {
 }
 
 func TestPeopleFindValidation(t *testing.T) {
-	res, _ := runCLI(t, personResponse, "people", "find", "--name", "Max Horstmann")
+	res, _ := runCLI(t, personResponse, "people", "find", "--name", "Satya Nadella")
 	if res.code != 2 || !strings.Contains(res.stderr, "--name requires --company") {
 		t.Fatalf("%+v", res)
 	}

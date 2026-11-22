@@ -18,7 +18,7 @@ immediately if it is not set.
 ## Usage
 
 ```sh
-sumble people find --name "Max Horstmann" --company-domain stackoverflow.com
+sumble people find --name "Satya Nadella" --company-domain microsoft.com
 sumble people find --linkedin https://www.linkedin.com/in/...
 sumble people search "Salesforce admins" --org-id 10441 --location US:Texas --limit 25
 sumble orgs find --url stripe.com

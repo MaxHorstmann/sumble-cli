@@ -22,7 +22,7 @@ func (a *app) peopleFind(ctx context.Context, args []string) int {
 	var in api.PersonInput
 	fs.StringVar(&in.Name, "name", "", "full name of the person")
 	fs.StringVar(&in.CompanyName, "company", "", "employer name (with --name)")
-	fs.StringVar(&in.CompanyDomain, "company-domain", "", "employer domain, e.g. stackoverflow.com (with --name)")
+	fs.StringVar(&in.CompanyDomain, "company-domain", "", "employer domain, e.g. microsoft.com (with --name)")
 	fs.StringVar(&in.JobTitle, "title", "", "job title, helps rank candidates (with --name)")
 	fs.StringVar(&in.LinkedInURL, "linkedin", "", "LinkedIn profile URL")
 	fs.Int64Var(&in.PersonID, "person-id", 0, "Sumble person ID")
