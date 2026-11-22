@@ -1,0 +1,36 @@
+name: What does Sumble know about me?
+
+on:
+  schedule:
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  report:
+    if: github.repository == 'MaxHorstmann/sumble-cli'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: false
+
+      - name: Install, look up, and comment
+        env:
+          SUMBLE_API_KEY: ${{ secrets.SUMBLE_API_KEY }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          go install github.com/MaxHorstmann/sumble-cli/cmd/sumble@latest
+          status=0
+          sumble people find --linkedin "https://www.linkedin.com/in/max-horstmann" --attrs all --json > result.json || status=$?
+          {
+            printf '[Workflow run](%s/%s/actions/runs/%s)\n\nCLI exit code: %s\n\n```json\n' "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" "$status"
+            cat result.json
+            printf '\n```\n'
+          } > comment.md
+          gh issue comment 4 --repo "$GITHUB_REPOSITORY" --body-file comment.md
+          exit "$status"
